@@ -27,13 +27,15 @@ solved board in generate_board.
 7) If the board is solved, print the board. If not, an extra mine was marked somewhere.
 
 """
+
 import random as rnd
 from copy import deepcopy
 
 # Constants
-MINE: str = 'X'
-BLANK: str = '_'
-FAIL: str = '*'
+MINE: str = "X"
+BLANK: str = "_"
+FAIL: str = "*"
+
 
 class MinesweeperBoard:
     # Member Variables
@@ -78,8 +80,7 @@ class MinesweeperBoard:
                     mine_neighbors = self._find_neighbors_of(x, y, MINE, self.solution)
                     self.solution[y][x] = str(mine_neighbors)
 
-
-    def _find_neighbors_of(self, x: int, y: int, cat: str = MINE, board = None) -> int:
+    def _find_neighbors_of(self, x: int, y: int, cat: str = MINE, board=None) -> int:
         # Set default board
         if board is None:
             board = self.board
@@ -97,51 +98,46 @@ class MinesweeperBoard:
         # Return the number of observed neighbors
         return obs
 
-
     def _is_in_bounds(self, x: int, y: int) -> bool:
         return (0 <= x < self.n) and (0 <= y < self.n)
-
 
     def __str__(self) -> str:
         board_str = ""
         for row in self.board:
             for char in row:
-                if char == '0':
+                if char == "0":
                     char = BLANK
                 board_str += f"{char} "
             board_str += "\n"
 
         return board_str
 
-
     def print(self) -> None:
-        width = ((self.n + 2) * 2 - 1)
-        print('=' * width)
+        width = (self.n + 2) * 2 - 1
+        print("=" * width)
         for row in self.board:
-            print('| ', end = "")
+            print("| ", end="")
             for char in row:
-                if char == '0':
-                    char = ' '
-                print(f"{char} ", end = "")
-            print('|')
-        print('=' * width)
-
+                if char == "0":
+                    char = " "
+                print(f"{char} ", end="")
+            print("|")
+        print("=" * width)
 
     def _print_answer(self):
-        width = ((self.n + 2) * 2 - 1)
-        print('=' * width)
+        width = (self.n + 2) * 2 - 1
+        print("=" * width)
         for row in self.solution:
-            print('| ', end="")
+            print("| ", end="")
             for char in row:
-                if char == '0':
-                    char = ' '
+                if char == "0":
+                    char = " "
                 print(f"{char} ", end="")
-            print('|')
-        print('=' * width)
-
+            print("|")
+        print("=" * width)
 
     def solve(self):
-        active: list[tuple[int, int]] = []             # List of active nodes
+        active: list[tuple[int, int]] = []  # List of active nodes
 
         # Step 1: Add a random solved node to the active list
         while len(active) == 0:
@@ -164,7 +160,7 @@ class MinesweeperBoard:
 
                 # Find blank and mines counts
                 num_blanks = self._find_neighbors_of(x, y, BLANK)
-                num_mines  = self._find_neighbors_of(x, y, MINE)
+                num_mines = self._find_neighbors_of(x, y, MINE)
 
                 # Step 3: Check the number of neighboring blanks and mark all blanks if mines capped
                 if num == num_blanks + num_mines:
@@ -210,7 +206,6 @@ class MinesweeperBoard:
         else:
             self._lose("Still spots left to expand!")
 
-
     # Returns true if all blanks have been expanded, false otherwise
     def is_solved(self):
         for row in self.board:
@@ -219,7 +214,6 @@ class MinesweeperBoard:
                     return False
 
         return True
-
 
     # Places the component from board at [y][x] on the solution.
     # Returns true if reveal was a success, false if a mine was hit
@@ -232,7 +226,6 @@ class MinesweeperBoard:
         self.board[y][x] = self.solution[y][x]
         return y, x
 
-
     def _reveal_neighbors(self, x: int, y: int) -> list[tuple[int, int]]:
         revealed_list = []
         for yn in range(y - 1, y + 2):
@@ -244,7 +237,6 @@ class MinesweeperBoard:
 
         return revealed_list
 
-
     def _guess(self) -> tuple[int, int]:
         # Pick random spots until one of them is blank, then expand it
         while True:
@@ -254,14 +246,12 @@ class MinesweeperBoard:
             if self.board[y][x] == BLANK:
                 return self._reveal(x, y)
 
-
     def _mark(self, x: int, y: int) -> None:
         # Sanity check
         if not self._is_in_bounds(x, y):
             return
 
         self.board[y][x] = MINE
-
 
     def _mark_neighbors(self, x: int, y: int) -> None:
         for yn in range(y - 1, y + 2):
@@ -270,8 +260,7 @@ class MinesweeperBoard:
                 if self._is_in_bounds(xn, yn) and self.board[yn][xn] == BLANK:
                     self._mark(xn, yn)
 
-
-    def _mark_fail(self, x: int, y: int, reason = "Mine Exploded") -> None:
+    def _mark_fail(self, x: int, y: int, reason="Mine Exploded") -> None:
         # Sanity Check
         if not self._is_in_bounds(x, y):
             return
@@ -279,8 +268,7 @@ class MinesweeperBoard:
         self.board[y][x] = FAIL
         self._lose(reason)
 
-
-    def _lose(self, reason = "Mine Exploded") -> None:
+    def _lose(self, reason="Mine Exploded") -> None:
         print(f"Failure -> {reason}")
         print("Final Board State:")
         self.print()
@@ -288,7 +276,6 @@ class MinesweeperBoard:
         print("Intended Solution:")
         self._print_answer()
         print()
-
 
     def _win(self) -> None:
         print("Solution Found!")
@@ -298,6 +285,7 @@ class MinesweeperBoard:
 
 def main():
     MinesweeperBoard(45, 250).solve()
+
 
 if __name__ == "__main__":
     main()
