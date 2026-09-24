@@ -106,7 +106,7 @@ class MinesweeperBoard:
         for row in self.board:
             for char in row:
                 if char == "0":
-                    char = BLANK
+                    char = ' '
                 board_str += f"{char} "
             board_str += "\n"
 
@@ -136,7 +136,7 @@ class MinesweeperBoard:
             print("|")
         print("=" * width)
 
-    def solve(self):
+    def solve(self) -> bool:
         active: list[tuple[int, int]] = []  # List of active nodes
 
         # Step 1: Add a random solved node to the active list
@@ -178,7 +178,7 @@ class MinesweeperBoard:
                         # Check if the reveal was successful
                         if self.board[yn][xn] == MINE:
                             self._mark_fail(xn, yn, "Bad Reveal")
-                            return
+                            return False
                         else:
                             active.append((yn, xn))
 
@@ -190,7 +190,7 @@ class MinesweeperBoard:
 
             # No node could make a change occur. Randomly guess if board isn't already solved
             if not change_occurred and not self.is_solved():
-                pos = self._guess()
+                pos = self._guess(active)
                 guess = self.board[pos[0]][pos[1]]
 
                 # If the guess was good, add it to the active list!
@@ -198,13 +198,15 @@ class MinesweeperBoard:
                     active.append(pos)
                 else:
                     self._mark_fail(pos[1], pos[0], "Incorrect Guess")
-                    return
+                    return False
 
         # Step 7: If the board is solved, print it with success. Otherwise failure
         if self.is_solved():
             self._win()
+            return True
         else:
             self._lose("Still spots left to expand!")
+            return False
 
     # Returns true if all blanks have been expanded, false otherwise
     def is_solved(self):
@@ -237,7 +239,22 @@ class MinesweeperBoard:
 
         return revealed_list
 
-    def _guess(self) -> tuple[int, int]:
+    def _guess(self, active: list[tuple[int, int]]) -> tuple[int, int]:
+        # Find a low numbered cell and expand one of its neighbors
+        for num in range(1, 8):
+            # Extract cell coordinates
+            for y, x in active:
+                # Check if the cell is one of the numbers to be checked
+                cell = self.board[y][x]
+                if str(num) == cell:
+                    # Find one of its neighbors and reveal it
+                    for yn in range(y - 1, y + 2):
+                        for xn in range(x - 1, x + 2):
+                            if self._is_in_bounds(xn, yn) and self.board[yn][xn] == BLANK:
+                                return self._reveal(xn, yn)
+
+
+        # No good options (Failsafe
         # Pick random spots until one of them is blank, then expand it
         while True:
             x = rnd.randint(1, self.n - 1)
@@ -284,7 +301,15 @@ class MinesweeperBoard:
 
 
 def main():
-    MinesweeperBoard(45, 250).solve()
+    # Set random seed
+    seed = 42
+    rnd.seed(seed)
+
+    # Find a board that breaks
+    while not MinesweeperBoard(45, 225).solve():
+        seed += 1
+        rnd.seed(seed)
+    print(f"Seed: {seed}")
 
 
 if __name__ == "__main__":
